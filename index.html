@@ -1274,7 +1274,7 @@ function renderCr06Fixture(){
     '<p>Maakt zes gezamenlijke en één persoonlijk synthetisch reviewconflict aan. Bestaande reviewtaken blijven behouden. Alleen beschikbaar in deze PR-preview.</p>'+
     '<button class="btn primary" id="cr06Seed" type="button">CR06-testconflicten aanmaken / aanvullen</button>'+
     '<p class="note">Afzonderlijke concurrencytest: maakt één nieuwe, unieke gezamenlijke categorie-reviewtaak aan. Gebruik deze knop slechts één keer per testreeks.</p>'+
-    '<button class="btn" id="cr06CategoryRaceSeed" type="button">Nieuwe categorie-concurrencytest aanmaken</button>';
+    '<button class="btn" id="cr06CategoryRaceSeed" type="button">Nieuwe categorie-concurrencytest aanmaken</button>'+
     '<button class="btn" id="cr06Diagnostics" type="button">Toon technische conflictstatus</button>'+
     '<pre id="cr06DiagnosticOutput" class="note" hidden style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>';
 }
@@ -1312,7 +1312,6 @@ $('cr06Fixture')?.addEventListener('click',async event=>{
     button.disabled=false; button.textContent='Nieuwe categorie-concurrencytest aanmaken';
   }
 });
-
 $('cr06Fixture')?.addEventListener('click',event=>{
   const button=event.target.closest('#cr06Diagnostics'); if(!button)return;
   if(!IS_CR06_PREVIEW||!coreMode||!coreReady||!coreRuntime)return;
