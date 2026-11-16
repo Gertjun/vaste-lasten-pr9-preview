@@ -1275,6 +1275,8 @@ function renderCr06Fixture(){
     '<button class="btn primary" id="cr06Seed" type="button">CR06-testconflicten aanmaken / aanvullen</button>'+
     '<p class="note">Afzonderlijke concurrencytest: maakt één nieuwe, unieke gezamenlijke categorie-reviewtaak aan. Gebruik deze knop slechts één keer per testreeks.</p>'+
     '<button class="btn" id="cr06CategoryRaceSeed" type="button">Nieuwe categorie-concurrencytest aanmaken</button>';
+    '<button class="btn" id="cr06Diagnostics" type="button">Toon technische conflictstatus</button>'+
+    '<pre id="cr06DiagnosticOutput" class="note" hidden style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>';
 }
 $('cr06Fixture')?.addEventListener('click',async event=>{
   const button=event.target.closest('#cr06Seed'); if(!button)return;
@@ -1309,6 +1311,30 @@ $('cr06Fixture')?.addEventListener('click',async event=>{
     toast('Categorie-concurrencytest kon niet worden opgeslagen: '+(error.message||error));
     button.disabled=false; button.textContent='Nieuwe categorie-concurrencytest aanmaken';
   }
+});
+
+$('cr06Fixture')?.addEventListener('click',event=>{
+  const button=event.target.closest('#cr06Diagnostics'); if(!button)return;
+  if(!IS_CR06_PREVIEW||!coreMode||!coreReady||!coreRuntime)return;
+  const data=state.samen||{}, conflicts=data.__conflicts||{};
+  const records=Object.values(conflicts.records||{}).filter(x=>x&&x.path==='cats:pr9-cr06-concurrency-01');
+  const pending=globalThis.VasteLastenConflictReview.pendingConflicts(conflicts).filter(x=>x.path==='cats:pr9-cr06-concurrency-01');
+  const decisions=Object.entries(conflicts.decisions||{}).filter(([id])=>records.some(x=>x.id===id)).flatMap(([,items])=>items||[]);
+  const concurrent=Object.values(conflicts.records||{}).filter(x=>x&&x.path==='cats:pr9-cr06-concurrency-01'&&x.kind==='concurrent-review');
+  const current=(data.cats||{})['pr9-cr06-concurrency-01']||null;
+  const output={
+    profile:cfg&&cfg.me||null,
+    online:navigator.onLine,
+    syncPill:$('syncPill')?.textContent||'',
+    categoryValue:current,
+    originalConflictRecords:records.map(x=>({id:x.id,kind:x.kind,alternatives:x.alternatives})),
+    decisions:decisions.map(x=>({id:x.id,deviceId:x.deviceId,at:x.at,selected:x.selected})),
+    concurrentRecords:concurrent.map(x=>({id:x.id,kind:x.kind,alternatives:x.alternatives})),
+    pending:pending.map(x=>({id:x.id,kind:x.kind,alternatives:x.alternatives}))
+  };
+  const outputNode=$('cr06DiagnosticOutput');
+  outputNode.hidden=false;
+  outputNode.textContent=JSON.stringify(output,null,2);
 });
 function applyConflictChoice(store,item,value){
   const data=state[store], now=Date.now(), parts=item.path.split(':');
