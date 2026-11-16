@@ -1,4 +1,4 @@
-const CACHE='vaste-lasten-3.1.1-core-v1.1.0-pr9-r3';
+const CACHE='vaste-lasten-3.1.1-core-v1.1.0';
 const PRECACHE=[
   "./index.html",
   "./manifest.webmanifest",
@@ -29,7 +29,8 @@ const PRECACHE=[
   "./js/multi-vault-adapter.js",
   "./js/bundle-biometric.js",
   "./js/vastelasten-core.js",
-  "./js/conflict-review.js"
+  "./js/conflict-review.js",
+  "./js/cr06-fixture.js"
 ];
 const ASSETS=PRECACHE;
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));});
