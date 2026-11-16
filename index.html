@@ -1272,7 +1272,9 @@ function renderCr06Fixture(){
   if(!allowed){host.innerHTML='';return;}
   host.innerHTML='<h2>CR06 · synthetische testgegevens</h2>'+
     '<p>Maakt zes gezamenlijke en één persoonlijk synthetisch reviewconflict aan. Bestaande reviewtaken blijven behouden. Alleen beschikbaar in deze PR-preview.</p>'+
-    '<button class="btn primary" id="cr06Seed" type="button">CR06-testconflicten aanmaken / aanvullen</button>';
+    '<button class="btn primary" id="cr06Seed" type="button">CR06-testconflicten aanmaken / aanvullen</button>'+
+    '<p class="note">Afzonderlijke concurrencytest: maakt één nieuwe, unieke gezamenlijke categorie-reviewtaak aan. Gebruik deze knop slechts één keer per testreeks.</p>'+
+    '<button class="btn" id="cr06CategoryRaceSeed" type="button">Nieuwe categorie-concurrencytest aanmaken</button>';
 }
 $('cr06Fixture')?.addEventListener('click',async event=>{
   const button=event.target.closest('#cr06Seed'); if(!button)return;
@@ -1289,6 +1291,23 @@ $('cr06Fixture')?.addEventListener('click',async event=>{
   }catch(error){
     toast('CR06-testgegevens konden niet worden opgeslagen: '+(error.message||error));
     renderCr06Fixture();
+  }
+});
+$('cr06Fixture')?.addEventListener('click',async event=>{
+  const button=event.target.closest('#cr06CategoryRaceSeed'); if(!button)return;
+  if(!IS_CR06_PREVIEW||!coreMode||!coreReady||!coreRuntime||!cfg||!['p1','p2'].includes(cfg.me))return;
+  button.disabled=true; button.textContent='Categorie-concurrencytest wordt opgeslagen…';
+  try{
+    const fixture=globalThis.VasteLastenCr06Fixture.createCategoryConcurrencyFixture();
+    state.samen.__conflicts=globalThis.VasteLastenConflictReview.mergeConflictState(state.samen.__conflicts,fixture.shared);
+    await coreRuntime.persistState(structuredClone(state));
+    await coreRuntime.flushLocal();
+    render(); renderSyncPanel(); scheduleSync();
+    toast('Nieuwe categorie-concurrencytest lokaal opgeslagen. Synchronisatie volgt automatisch.');
+    button.textContent='Categorie-concurrencytest aangemaakt';
+  }catch(error){
+    toast('Categorie-concurrencytest kon niet worden opgeslagen: '+(error.message||error));
+    button.disabled=false; button.textContent='Nieuwe categorie-concurrencytest aanmaken';
   }
 });
 function applyConflictChoice(store,item,value){
