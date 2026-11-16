@@ -53,5 +53,28 @@
     return { shared, personal, paths: [...PATHS] };
   }
 
-  root.VasteLastenCr06Fixture = Object.freeze({ createCr06Fixture, paths: PATHS });
+  function createCategoryConcurrencyFixture({ timestamp = 1794852000000 } = {}) {
+    const review = root.VasteLastenConflictReview;
+    if (!review) throw new Error('ConflictReview-module ontbreekt.');
+    const path = 'cats:pr9-cr06-concurrency-01';
+    const conflict = review.createConflict({
+      domain: 'shared',
+      path,
+      kind: 'content',
+      left: { id: 'pr9-cr06-concurrency-01', name: 'CR06 racecategorie A', c: 'c1', u: timestamp },
+      right: { id: 'pr9-cr06-concurrency-01', name: 'CR06 racecategorie B', c: 'c2', u: timestamp },
+      timestamp,
+    });
+    if (!conflict) throw new Error('Het categorieconflict kon niet worden aangemaakt.');
+    const shared = review.empty();
+    shared.pending[conflict.id] = conflict;
+    shared.records[conflict.id] = conflict;
+    return { shared, path, conflictId: conflict.id };
+  }
+
+  root.VasteLastenCr06Fixture = Object.freeze({
+    createCr06Fixture,
+    createCategoryConcurrencyFixture,
+    paths: PATHS,
+  });
 })(globalThis);
